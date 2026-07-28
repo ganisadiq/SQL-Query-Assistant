@@ -1,0 +1,14 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# IDE settings
+.vscode/
+a
+# Streamlit local config
+.streamlit/
+
+# OS files
+.DS_Store
+Thumbs.db
