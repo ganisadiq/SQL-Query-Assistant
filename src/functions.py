@@ -5,12 +5,12 @@ from src.retrieval.faiss_retriever import FAISSRetriever
 embedding_service = AzureEmbeddingService()
 retriever = FAISSRetriever(embedding_service)
 
-def search_policies(policy: str):
+def search_database_schema(question: str):
 
-    chunks = retriever.retrieve(policy)
+    chunks = retriever.retrieve(question)
 
     if not chunks:
-        return "Sorry, I couldn't find any relevant HR policy."
+        return "Sorry, I couldn't find any relevant database schema information."
 
     context = ""
 
@@ -18,4 +18,4 @@ def search_policies(policy: str):
         context += chunk.text
         context += "\n\n-----------------------------\n\n"
 
-        return context
+    return context

@@ -9,26 +9,28 @@ from openai.types.responses.response_input_param import (
     FunctionCallOutput,
     ResponseInputParam,
 )
-from src.functions import search_policies
+from src.functions import search_database_schema
 import json
 
-class HRPolicyAssistant:
+class SQLQueryAssistant:
 
     def __init__(self):
 
 
           self.search_tool = FunctionTool(
-                name="search_policies",
-                description="Search the HR policy documents for information.",
+                name="search_database_schema",
+                description="""Search the database schema, relationships,
+                             business rules, and SQL guidelines to help
+                            generate an accurate SQL query.""",
                 parameters={
                                 "type": "object",
                                 "properties": {
-                                                "policy": {
+                                                "question": {
                                                 "type": "string",
-                                                "description": "The HR policy topic the user is asking about."
+                                                "description": "The user's request for generating an SQL query."
                                                             }
                                                  },
-                                "required":["policy"],
+                                "required":["question"],
                                 "additionalProperties":False
                             },
                 strict=True
@@ -41,15 +43,40 @@ class HRPolicyAssistant:
           )
           self.openai_client = self.project_client.get_openai_client()
           self.agent = self.project_client.agents.create_version(
-                agent_name="policy-search-agent",
+                agent_name="sql-query-agent",
                 definition=PromptAgentDefinition(
                 model=model_deployment,
                 instructions="""
-                            You are an HR Policy Assistant.
-                            You answer questions about the company's HR policies.
-                            When a user asks about any HR policy, benefits, leave, notice period, resignation, employment rules, or other HR-related topics, use the available search_policies tool.
-                            For general conversation such as greetings or thanks, respond normally without calling any tool.
-                    """,
+                                You are an SQL Query Assistant.
+
+                                Your job is to generate accurate SQL queries
+                                based on the database documentation.
+
+                                Whenever a user asks for an SQL query,
+                                information about tables,
+                                columns,
+                                relationships,
+                                or business rules,
+                                always use the search_database_schema tool.
+
+                                Only use tables and columns that appear in
+                                the retrieved context.
+
+                                Never invent table names,
+                                column names,
+                                or relationships.
+
+                                If the requested information is not available
+                                in the retrieved documentation,
+                                tell the user that the schema does not contain
+                                enough information.
+
+                                For greetings or normal conversation,
+                                respond without calling any tool.
+
+                                Return SQL only unless the user explicitly
+                                asks for an explanation.
+                                """,
                 tools=[self.search_tool]
                 ),
             )
@@ -88,8 +115,8 @@ class HRPolicyAssistant:
             for item in response.output:
                 if item.type == "function_call":
                     function_name = item.name
-                    if function_name == "search_policies":
-                        result = search_policies(**json.loads(item.arguments))
+                    if function_name == "search_database_schema":
+                        result = search_database_schema(**json.loads(item.arguments))
                         self.input_list.append(
                             FunctionCallOutput(
                                 type="function_call_output",
@@ -115,8 +142,8 @@ class HRPolicyAssistant:
 
             return response.output_text
 
-            self.project_client.agents.delete_version(agent_name=agent.name, agent_version=agent.version)
-            print("Deleted agent.")  
+            # self.project_client.agents.delete_version(agent_name=agent.name, agent_version=agent.version)
+            # print("Deleted agent.")  
                             
 
 

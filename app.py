@@ -1,16 +1,16 @@
 import streamlit as st
-from src.agent import HRPolicyAssistant
+from src.agent import SQLQueryAssistant
 
 # ---------------- Page Configuration ----------------
 st.set_page_config(
-    page_title="HR Policy Assistant",
-    page_icon="🤖",
+    page_title="SQL Query Assistant",
+    page_icon="💻",
     layout="centered"
 )
 
 # ---------------- Session State ----------------
 if "assistant" not in st.session_state:
-    st.session_state.assistant = HRPolicyAssistant()
+    st.session_state.assistant = SQLQueryAssistant()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -43,8 +43,8 @@ div[data-testid="stCaptionContainer"] {
 """, unsafe_allow_html=True)
 
 # ---------------- Header ----------------
-st.title("🤖 HR Policy Assistant")
-st.caption("AI-powered assistant for HR policy questions")
+st.title("💻 SQL Query Assistant")
+st.caption("Ask me to generate an SQL query...")
 
 st.divider()
 
@@ -54,11 +54,9 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # ---------------- Chat Input ----------------
-if prompt := st.chat_input("Ask your HR question..."):
+if prompt := st.chat_input("Describe the SQL query you need..."):
 
-    response = st.session_state.assistant.get_response(prompt)
-
-    # Show user message
+    # Save user message
     st.session_state.messages.append(
         {"role": "user", "content": prompt}
     )
@@ -66,14 +64,12 @@ if prompt := st.chat_input("Ask your HR question..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Get AI response
+    # Get AI response (only once)
     response = st.session_state.assistant.get_response(prompt)
 
-    # Show AI response
     with st.chat_message("assistant"):
         st.markdown(response)
 
-    # Save AI response
     st.session_state.messages.append(
         {"role": "assistant", "content": response}
     )
