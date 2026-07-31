@@ -7,6 +7,9 @@ from src.loaders.json_loader import JSONLoader
 from src.chunker.chunker import TextChunker
 from src.embedding.azure_embedding_service import AzureEmbeddingService
 from src.indexing.faiss_index_builder import FAISSIndexBuilder
+from src.config import sql_server_connection_string
+from src.loaders.sql_schema_loader import SQLSchemaLoader
+from src.database.sql_server_database import SQLServerDatabase
 
 def main():
 
@@ -39,6 +42,10 @@ def main():
 
         document = loader.load(file_path)
         documents.extend(document)
+
+    database = SQLServerDatabase(sql_server_connection_string)
+    schema_loader = SQLSchemaLoader(database=database)
+    documents.extend(schema_loader.load())
 
     chunker = TextChunker(chunk_size=500, chunk_overlap=100)
     chunks = chunker.chunk(documents=documents)
