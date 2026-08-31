@@ -4,3 +4,5 @@ python-dotenv
 openai
 pymupdf
 faiss-cpu
+sqlalchemy
+pyodbc
